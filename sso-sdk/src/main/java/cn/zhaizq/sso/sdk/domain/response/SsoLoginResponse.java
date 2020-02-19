@@ -1,6 +1,6 @@
 package cn.zhaizq.sso.sdk.domain.response;
 
-import com.ggboy.framework.common.domain.DataResponse;
+import cn.zhaizq.sso.sdk.domain.DataResponse;
 import lombok.Getter;
 import lombok.Setter;
 
