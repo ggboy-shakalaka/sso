@@ -2,6 +2,7 @@ package cn.zhaizq.sso.web;
 
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.mapper.UserMapper;
+import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,13 @@ public class ApplicationTest {
     public void testSelect() {
         List<User> userList = userMapper.selectList(null);
         userList.forEach(System.out::println);
+    }
+
+    @Autowired
+    private RedisWrapper redisWrapper;
+
+    @Test
+    public void redisTest() {
+        redisWrapper.set("Test:003", "123456");
     }
 }
