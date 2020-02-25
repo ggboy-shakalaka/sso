@@ -70,7 +70,7 @@ public class ApiController extends BaseController {
     public void refresh_token(@PathVariable String appId, @RequestParam String redirect, @RequestParam String login_url) throws IOException {
         Cookie tokenCookie = SsoHelper.getSsoToken(request);
 
-        if (tokenCookie != null && tokenCookie.getValue() != null && userCache.get(tokenCookie.getValue()) != null) {
+        if (tokenCookie != null && userCache.get(tokenCookie.getValue()) != null) {
             URIBuilder uri = new URIBuilder(URI.create(redirect));
             uri.addParameter(SsoConstant.TOKEN_NAME, tokenCookie.getValue());
             response.sendRedirect(uri.toString());

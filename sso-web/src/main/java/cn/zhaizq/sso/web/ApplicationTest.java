@@ -28,6 +28,7 @@ public class ApplicationTest {
 
     @Test
     public void redisTest() {
-        redisWrapper.set("Test:003", "123456");
+        redisWrapper.set("Test:001", null);
+//        redisWrapper.expire("Test:001", 90000);
     }
 }
