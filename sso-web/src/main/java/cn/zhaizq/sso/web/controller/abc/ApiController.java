@@ -11,10 +11,12 @@ import cn.zhaizq.sso.sdk.domain.response.SsoCheckTokenResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoLoginResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoLogoutResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoQueryConfigResponse;
+import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.service.LoginService;
 import cn.zhaizq.sso.web.cache.TokenCache;
 import cn.zhaizq.sso.web.cache.UserCache;
 import cn.zhaizq.sso.web.controller.BaseController;
+import com.ggboy.framework.common.exception.BusinessException;
 import com.ggboy.framework.utils.common.StringRsaUtil;
 import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.apache.http.client.utils.URIBuilder;
@@ -41,8 +43,6 @@ public class ApiController extends BaseController {
     @Autowired
     private TokenCache tokenCache;
     @Autowired
-    private RedisWrapper redisWrapper;
-    @Autowired
     private LoginService loginService;
 
     @Value("${sso.base.location}")
@@ -63,16 +63,19 @@ public class ApiController extends BaseController {
         return response;
     }
 
-
     @PostMapping("/check_token")
     public SsoCheckTokenResponse check_token(@PathVariable String appId, @RequestBody SsoCheckTokenRequest ssoCheckToken) {
         SsoCheckTokenResponse response = new SsoCheckTokenResponse();
 
-        SsoUser ssoUser = userCache.get(ssoCheckToken.getToken());
-        if (ssoUser == null) {
+        User user = userCache.get(ssoCheckToken.getToken());
+        if (user == null) {
             response.setCode("400");
             return response;
         }
+
+        SsoUser ssoUser = new SsoUser();
+        ssoUser.setId(user.getId() + "");
+        ssoUser.setName(user.getUserName());
 
         response.setCode("200");
         response.setData(ssoUser);
@@ -103,20 +106,20 @@ public class ApiController extends BaseController {
 
     @PostMapping("/login")
     public SsoLoginResponse login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
-        String password = StringRsaUtil.decryptByPrivateKey(loginRequest.getPassword(), loginService.getPrivateKeyByUserName(loginRequest.getName()));
         SsoLoginResponse response = new SsoLoginResponse();
-        if (!"zhaizq".equals(loginRequest.getName()) && !"1".equals(password)) {
-            response.setCode("400");
-            return response;
+
+        User user = loginService.login(loginRequest.getName(), loginRequest.getPassword());
+
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
         }
 
         String ssoToken = tokenCache.get(loginRequest.getName());
         if (ssoToken == null) {
-            ssoToken = UUID.randomUUID().toString();
-            tokenCache.put(loginRequest.getName(), ssoToken);
+            tokenCache.put(loginRequest.getName(), ssoToken = UUID.randomUUID().toString());
         }
 
-        userCache.put(ssoToken, new SsoUser());
+        userCache.put(ssoToken, user);
         response.setCode("200");
         response.setData(ssoToken);
         return response;
@@ -129,7 +132,7 @@ public class ApiController extends BaseController {
     }
 
     @GetMapping("/getPublicKey")
-    public String getPublicKey(@RequestParam String userName) throws NoSuchAlgorithmException {
-        return loginService.getPublicKeyByUserName(userName);
+    public String getPublicKey(@RequestParam String name) throws NoSuchAlgorithmException {
+        return loginService.getPublicKeyByName(name);
     }
 }

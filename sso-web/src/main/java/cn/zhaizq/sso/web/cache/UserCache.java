@@ -1,6 +1,6 @@
 package cn.zhaizq.sso.web.cache;
 
-import cn.zhaizq.sso.sdk.domain.SsoUser;
+import cn.zhaizq.sso.service.domain.entry.User;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -8,13 +8,13 @@ import java.util.Map;
 
 @Component
 public class UserCache {
-    private Map<String, SsoUser> cache = new HashMap<>();
+    private Map<String, User> cache = new HashMap<>();
 
-    public SsoUser get(String token) {
+    public User get(String token) {
         return token == null ? null : cache.get(token);
     }
 
-    public SsoUser put(String token, SsoUser ssoUser) {
-        return cache.put(token, ssoUser);
+    public User put(String token, User user) {
+        return cache.put(token, user);
     }
 }

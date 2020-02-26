@@ -61,7 +61,7 @@
 
         function getPublicKey(userName,password){
             $.ajax({
-                url: '/api/'+getQueryVariable('appId')+'/getPublicKey?userName='+userName,
+                url: '/api/'+getQueryVariable('appId')+'/getPublicKey?name='+userName,
                 method: 'get',
                 success: function(result) {
                    login(result,userName,password);
