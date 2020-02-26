@@ -11,17 +11,26 @@ import cn.zhaizq.sso.sdk.domain.response.SsoCheckTokenResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoLoginResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoLogoutResponse;
 import cn.zhaizq.sso.sdk.domain.response.SsoQueryConfigResponse;
+import cn.zhaizq.sso.service.service.LoginService;
 import cn.zhaizq.sso.web.cache.TokenCache;
 import cn.zhaizq.sso.web.cache.UserCache;
 import cn.zhaizq.sso.web.controller.BaseController;
+import com.ggboy.framework.utils.common.StringRsaUtil;
+import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.net.URI;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +40,10 @@ public class ApiController extends BaseController {
     private UserCache userCache;
     @Autowired
     private TokenCache tokenCache;
+    @Autowired
+    private RedisWrapper redisWrapper;
+    @Autowired
+    private LoginService loginService;
 
     @Value("${sso.base.location}")
     private String baseLocation;
@@ -89,9 +102,10 @@ public class ApiController extends BaseController {
     }
 
     @PostMapping("/login")
-    public SsoLoginResponse login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) {
+    public SsoLoginResponse login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
+        String password = StringRsaUtil.decryptByPrivateKey(loginRequest.getPassword(), loginService.getPrivateKeyByUserName(loginRequest.getName()));
         SsoLoginResponse response = new SsoLoginResponse();
-        if (!"zhaizq".equals(loginRequest.getName()) && !"1".equals(loginRequest.getPassword())) {
+        if (!"zhaizq".equals(loginRequest.getName()) && !"1".equals(password)) {
             response.setCode("400");
             return response;
         }
@@ -112,5 +126,10 @@ public class ApiController extends BaseController {
     public SsoLogoutResponse logout(@RequestBody SsoLogoutRequest request) {
         userCache.put(request.getSsoToken(), null);
         return new SsoLogoutResponse();
+    }
+
+    @GetMapping("/getPublicKey")
+    public String getPublicKey(@RequestParam String userName) throws NoSuchAlgorithmException {
+        return loginService.getPublicKeyByUserName(userName);
     }
 }

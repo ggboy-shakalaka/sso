@@ -6,29 +6,22 @@
 </head>
 <body>
 <form>
-    <input type="text" name="name" />
+    <input type="text" name="name" id="loginUserName"/>
     <br/>
     <br/>
-    <input type="password" name="password" />
+    <input type="password" name="password" id="loginPassword" />
     <br/>
     <br/>
     <button type="button">Login</button>
 </form>
 <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script src="http://passport.cnblogs.com/scripts/jsencrypt.min.js"></script>
 <script>
     $(function() {
         $("button").click(function() {
-            let params = $("form").serializeObject(); //将表单序列化为JSON对象
-            $.ajax({
-                url: '/api/'+getQueryVariable('appId')+'/login',
-                method: 'post',
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(params),
-                dataType: "json",
-                success: function(result) {
-                    location.href = "http://sso.zhaizq.cn?redirect="+getQueryVariable('redirect')+"&sso.token=" + result.data;
-                }
-            });
+            var userName = $("#loginUserName").val();
+            var password = $("#loginPassword").val();
+            getPublicKey(userName,password);
         });
 
         function getQueryVariable(variable) {
@@ -41,6 +34,39 @@
                 }
             }
             return;
+        }
+
+        function login(publicKey,userName,password){
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey(publicKey );
+            var encryptPassword = encrypt.encrypt(password);
+            $.ajax({
+                url: '/api/'+getQueryVariable('appId')+'/login',
+                method: 'post',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    name : userName,
+                    password : encryptPassword
+                }),
+                dataType: "json",
+                success: function(result) {
+                    if(result.code == '200'){
+                       location.href = "http://localhost?redirect="+getQueryVariable('redirect')+"&sso.token=" + result.data;
+                    }else{
+                        alert(result.code);
+                    }
+                }
+            });
+        }
+
+        function getPublicKey(userName,password){
+            $.ajax({
+                url: '/api/'+getQueryVariable('appId')+'/getPublicKey?userName='+userName,
+                method: 'get',
+                success: function(result) {
+                   login(result,userName,password);
+                }
+            });
         }
     });
 
