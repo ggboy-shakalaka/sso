@@ -1,6 +1,8 @@
 package cn.zhaizq.sso.service.service;
 
 import cn.zhaizq.sso.service.domain.entry.User;
+import cn.zhaizq.sso.service.mapper.UserMapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ggboy.framework.common.exception.BusinessException;
 import com.ggboy.framework.utils.common.StringRsaUtil;
 import com.ggboy.framework.utils.redis.RedisWrapper;
@@ -11,7 +13,9 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
@@ -31,12 +35,17 @@ public class LoginService {
 
     @Autowired
     private RedisWrapper redisWrapper;
+    @Autowired
+    private UserMapper userMapper;
 
-    public User doLogin(String name, String password) {
-        User user = new User();
-        user.setId(1);
-        user.setUserName(name);
-        return user;
+    public User doLogin(String name, String password) throws NoSuchAlgorithmException {
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("user_name", name);
+        User user = userMapper.selectOne(userQueryWrapper);
+        if (user != null && user.getPassword().equals(getMd5(user.getId() + password + user.getId()))) {
+            return user;
+        }
+        return null;
     }
 
     public User login(String name, String encryptedPassword) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
@@ -69,5 +78,11 @@ public class LoginService {
 
     private String buildBackupPrivateKey(String name) {
         return "Login:UserPrivateKey:" + name;
+    }
+
+    public String getMd5(String str) throws NoSuchAlgorithmException {
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        md5.update(str.getBytes());
+        return new BigInteger(1, md5.digest()).toString(16);
     }
 }
