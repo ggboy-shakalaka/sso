@@ -17,8 +17,6 @@ import cn.zhaizq.sso.web.cache.TokenCache;
 import cn.zhaizq.sso.web.cache.UserCache;
 import cn.zhaizq.sso.web.controller.BaseController;
 import com.ggboy.framework.common.exception.BusinessException;
-import com.ggboy.framework.utils.common.StringRsaUtil;
-import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,11 +82,11 @@ public class ApiController extends BaseController {
 
     @GetMapping("/refresh_token")
     public void refresh_token(@PathVariable String appId, @RequestParam String redirect, @RequestParam String login_url) throws IOException {
-        Cookie tokenCookie = SsoHelper.getSsoToken(request);
+        String token = SsoHelper.getSsoToken(request);
 
-        if (tokenCookie != null && userCache.get(tokenCookie.getValue()) != null) {
+        if (token != null && userCache.get(token) != null) {
             URIBuilder uri = new URIBuilder(URI.create(redirect));
-            uri.addParameter(SsoConstant.TOKEN_NAME, tokenCookie.getValue());
+            uri.addParameter(SsoConstant.TOKEN_NAME, token);
             response.sendRedirect(uri.toString());
             return;
         }

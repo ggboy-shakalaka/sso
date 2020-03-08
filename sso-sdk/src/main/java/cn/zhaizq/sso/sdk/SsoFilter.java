@@ -1,14 +1,13 @@
 package cn.zhaizq.sso.sdk;
 
-import cn.zhaizq.sso.sdk.domain.response.SsoCheckTokenResponse;
-import org.apache.http.client.utils.URIBuilder;
+import cn.zhaizq.sso.sdk.domain.SsoUser;
+import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URI;
 
 public class SsoFilter implements Filter {
     private String ignore;
@@ -34,7 +33,7 @@ public class SsoFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String requestUri = request.getRequestURI();
-        Cookie token = SsoHelper.getSsoToken(request);
+        String token = SsoHelper.getSsoToken(request);
 
 //        if (SsoHelper.isMatch(login, requestUri)) {
 //            response.sendRedirect(ssoService.getLoginPath());
@@ -59,14 +58,14 @@ public class SsoFilter implements Filter {
             return;
         }
 
-        SsoCheckTokenResponse resp = ssoService.checkToken(token == null ? null : token.getValue());
+        SsoResponse<SsoUser> resp = ssoService.checkToken(token);
 
-        if (!"200".equalsIgnoreCase(resp.getCode())) {
+        if (resp.code() != 200) {
             response.sendRedirect(ssoService.getRefreshTokenPath(SsoHelper.getRootPath(request), null));
             return;
         }
 
-        request.setAttribute(SsoConstant.SSO_USER, resp.getData());
+        request.setAttribute(SsoConstant.SSO_USER, resp.data());
 
         filterChain.doFilter(servletRequest, servletResponse);
     }
