@@ -64,7 +64,12 @@
                 url: '/api/'+getQueryVariable('appId')+'/getPublicKey?name='+userName,
                 method: 'get',
                 success: function(result) {
-                   login(result,userName,password);
+                    if (result.code === 200) {
+                        alert(result.data);
+                        login(result.data,userName,password);
+                    } else {
+                        alert("登录失败");
+                    }
                 }
             });
         }

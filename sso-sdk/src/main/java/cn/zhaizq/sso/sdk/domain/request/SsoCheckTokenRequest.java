@@ -7,4 +7,10 @@ import lombok.Setter;
 @Setter
 public class SsoCheckTokenRequest {
     private String token;
+
+    public static SsoCheckTokenRequest build(String token) {
+        SsoCheckTokenRequest ssoCheckTokenRequest = new SsoCheckTokenRequest();
+        ssoCheckTokenRequest.setToken(token);
+        return ssoCheckTokenRequest;
+    }
 }

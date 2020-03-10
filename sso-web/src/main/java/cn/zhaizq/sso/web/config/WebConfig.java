@@ -1,51 +1,42 @@
 package cn.zhaizq.sso.web.config;
 
-import cn.zhaizq.sso.sdk.SsoConstant;
 import cn.zhaizq.sso.sdk.SsoFilter;
+import cn.zhaizq.sso.sdk.domain.SsoConfig;
+import com.alibaba.fastjson.JSON;
+import com.ggboy.framework.common.exception.BusinessException;
 import com.ggboy.framework.utils.redis.RedisWrapper;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.io.IOException;
+
 @Configuration
 public class WebConfig {
-    @Value("${sso.server}")
-    private String server;
-    @Value("${sso.appId}")
-    private String appId;
-    @Value("${sso.ignore}")
-    private String ignore;
+    @Autowired
+    private SsoConfig ssoConfig;
 
+    @SneakyThrows
     @Bean
-    public FilterRegistrationBean<SsoFilter> ssoFilter() {
+    public FilterRegistrationBean<SsoFilter> ssoFilter() throws IOException {
         FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new SsoFilter());
-        filterRegistrationBean.addInitParameter(SsoConstant.SERVER_PATH, server);
-        filterRegistrationBean.addInitParameter(SsoConstant.APP_ID, appId);
-        filterRegistrationBean.addInitParameter(SsoConstant.IGNORE_PATH, ignore);
+        filterRegistrationBean.setFilter(new SsoFilter(ssoConfig));
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setEnabled(true);
         return filterRegistrationBean;
     }
 
-    @Value("${spring.redis.host}")
-    private String host;
-    @Value("${spring.redis.port}")
-    private int port;
-    @Value("${spring.redis.password}")
-    private String password;
-    @Value("${spring.redis.database}")
-    private int database;
-    @Value("${spring.redis.timeout}")
-    private int timeout;
+    @Autowired
+    private RedisProperties redisConfig;
 
     @Bean
     public RedisWrapper redisWrapper() {
         JedisPoolConfig config = new JedisPoolConfig();
-        JedisPool jedisPool = new JedisPool(config, host, port, timeout, password, database);
+        JedisPool jedisPool = new JedisPool(config, redisConfig.getHost(), redisConfig.getPort(), redisConfig.getTimeout(), redisConfig.getPassword(), redisConfig.getDatabase());
         return new RedisWrapper(jedisPool);
     }
 }

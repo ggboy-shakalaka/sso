@@ -7,10 +7,7 @@ import cn.zhaizq.sso.sdk.domain.SsoUser;
 import cn.zhaizq.sso.sdk.domain.request.SsoCheckTokenRequest;
 import cn.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
 import cn.zhaizq.sso.sdk.domain.request.SsoLogoutRequest;
-import cn.zhaizq.sso.sdk.domain.response.SsoCheckTokenResponse;
-import cn.zhaizq.sso.sdk.domain.response.SsoLoginResponse;
-import cn.zhaizq.sso.sdk.domain.response.SsoLogoutResponse;
-import cn.zhaizq.sso.sdk.domain.response.SsoQueryConfigResponse;
+import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.service.LoginService;
 import cn.zhaizq.sso.web.cache.TokenCache;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.net.URI;
 import java.security.InvalidKeyException;
@@ -37,47 +33,36 @@ import java.util.UUID;
 @RequestMapping("/api/{appId}")
 public class ApiController extends BaseController {
     @Autowired
+    private SsoConfig ssoConfig;
+    @Autowired
     private UserCache userCache;
     @Autowired
     private TokenCache tokenCache;
     @Autowired
     private LoginService loginService;
 
-    @Value("${sso.base.location}")
-    private String baseLocation;
-
     @PostMapping("/query_config")
-    public SsoQueryConfigResponse query_config(@PathVariable String appId) {
-        SsoConfig config = new SsoConfig();
-        config.setServerPath(baseLocation);
+    public SsoResponse<SsoConfig.ServerConfig> query_config(@PathVariable String appId) {
+        SsoConfig.ServerConfig config = new SsoConfig.ServerConfig();
+        config.setServerUrl(ssoConfig.getServerConfig().getServerUrl());
         config.setLoginPath(String.format("/api/%s/login", appId));
         config.setLogoutPath(String.format("/api/%s/logout", appId));
         config.setCheckTokenPath(String.format("/api/%s/check_token", appId));
         config.setRefreshTokenPath(String.format("/api/%s/refresh_token", appId));
 
-        SsoQueryConfigResponse response = new SsoQueryConfigResponse();
-        response.setCode("200");
-        response.setData(config);
-        return response;
+        return new SsoResponse<SsoConfig.ServerConfig>().code(200).data(config);
     }
 
     @PostMapping("/check_token")
-    public SsoCheckTokenResponse check_token(@PathVariable String appId, @RequestBody SsoCheckTokenRequest ssoCheckToken) {
-        SsoCheckTokenResponse response = new SsoCheckTokenResponse();
-
+    public SsoResponse<SsoUser> check_token(@PathVariable String appId, @RequestBody SsoCheckTokenRequest ssoCheckToken) {
         User user = userCache.get(ssoCheckToken.getToken());
-        if (user == null) {
-            response.setCode("400");
-            return response;
-        }
+        if (user == null)
+            return new SsoResponse<SsoUser>().code(400);
 
         SsoUser ssoUser = new SsoUser();
         ssoUser.setId(user.getId() + "");
         ssoUser.setName(user.getUserName());
-
-        response.setCode("200");
-        response.setData(ssoUser);
-        return response;
+        return new SsoResponse<SsoUser>().code(200).data(ssoUser);
     }
 
     @GetMapping("/refresh_token")
@@ -103,9 +88,8 @@ public class ApiController extends BaseController {
     }
 
     @PostMapping("/login")
-    public SsoLoginResponse login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
-        SsoLoginResponse response = new SsoLoginResponse();
-
+    @ResponseBody
+    public SsoResponse<String> login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
         User user = loginService.login(loginRequest.getName(), loginRequest.getPassword());
 
         if (user == null) {
@@ -118,19 +102,19 @@ public class ApiController extends BaseController {
         }
 
         userCache.put(ssoToken, user);
-        response.setCode("200");
-        response.setData(ssoToken);
-        return response;
+
+        return new SsoResponse<String>().code(200).data(ssoToken);
     }
 
     @PostMapping("/logout")
-    public SsoLogoutResponse logout(@RequestBody SsoLogoutRequest request) {
-        userCache.put(request.getSsoToken(), null);
-        return new SsoLogoutResponse();
+    public SsoResponse<?> logout(@RequestBody SsoLogoutRequest request) {
+        userCache.put(request.getToken(), null);
+        return new SsoResponse<>().code(200);
     }
 
     @GetMapping("/getPublicKey")
-    public String getPublicKey(@RequestParam String name) throws NoSuchAlgorithmException {
-        return loginService.getPublicKeyByName(name);
+    public SsoResponse<String> getPublicKey(@RequestParam String name) throws NoSuchAlgorithmException {
+        String publicKey = loginService.getPublicKeyByName(name);
+        return new SsoResponse<String>().code(200).data(publicKey);
     }
 }

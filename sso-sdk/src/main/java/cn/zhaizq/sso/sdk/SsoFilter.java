@@ -1,31 +1,19 @@
 package cn.zhaizq.sso.sdk;
 
+import cn.zhaizq.sso.sdk.domain.SsoConfig;
 import cn.zhaizq.sso.sdk.domain.SsoUser;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class SsoFilter implements Filter {
-    private String ignore;
+    private SsoApi ssoApi;
 
-    private SsoService ssoService;
-
-    public void init(FilterConfig filterConfig) throws ServletException {
-        String appId = filterConfig.getInitParameter(SsoConstant.APP_ID);
-        String server = filterConfig.getInitParameter(SsoConstant.SERVER_PATH);
-//        login = filterConfig.getInitParameter(Conf.LOGIN_PATH);
-//        logout = filterConfig.getInitParameter(Conf.LOGOUT_PATH);
-        ignore = filterConfig.getInitParameter(SsoConstant.IGNORE_PATH);
-
-//        login = login == null || login.length() == 0 ? "/login" : login;
-//        logout = logout == null || logout.length() == 0 ? "/logout" : logout;
-        ignore = ignore == null ? "" : ignore;
-
-        ssoService = new SsoService(server, appId);
+    public SsoFilter(SsoConfig ssoConfig) throws IOException {
+        ssoApi = SsoApi.init(ssoConfig);
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -35,17 +23,7 @@ public class SsoFilter implements Filter {
         String requestUri = request.getRequestURI();
         String token = SsoHelper.getSsoToken(request);
 
-//        if (SsoHelper.isMatch(login, requestUri)) {
-//            response.sendRedirect(ssoService.getLoginPath());
-//            return;
-//        }
-//
-//        if (SsoHelper.isMatch(logout, requestUri)) {
-//            response.sendRedirect(ssoService.getLogoutPath());
-//            return;
-//        }
-
-        for (String ignoreUrl : ignore.split(",")) {
+        for (String ignoreUrl : ssoApi.getConfig().getIgnore()) {
             if (SsoHelper.isMatch(ignoreUrl, requestUri)) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
@@ -58,16 +36,19 @@ public class SsoFilter implements Filter {
             return;
         }
 
-        SsoResponse<SsoUser> resp = ssoService.checkToken(token);
+        SsoResponse<SsoUser> resp = ssoApi.checkToken(token);
 
-        if (resp.code() != 200) {
-            response.sendRedirect(ssoService.getRefreshTokenPath(SsoHelper.getRootPath(request), null));
+        if (resp.getCode() != 200) {
+            response.sendRedirect(ssoApi.getConfig().getRefreshTokenUrl(SsoHelper.getRootPath(request)));
             return;
         }
 
-        request.setAttribute(SsoConstant.SSO_USER, resp.data());
+        request.setAttribute(SsoConstant.SSO_USER, resp.getData());
 
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     public void destroy() {
