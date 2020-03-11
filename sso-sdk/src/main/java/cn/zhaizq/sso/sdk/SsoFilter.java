@@ -12,8 +12,8 @@ import java.io.IOException;
 public class SsoFilter implements Filter {
     private SsoApi ssoApi;
 
-    public SsoFilter(SsoConfig ssoConfig) throws IOException {
-        ssoApi = SsoApi.init(ssoConfig);
+    public SsoFilter(SsoApi ssoApi) {
+        this.ssoApi = ssoApi;
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {

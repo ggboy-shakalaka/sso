@@ -2,15 +2,12 @@ package cn.zhaizq.sso.web;
 
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.mapper.UserMapper;
-import com.ggboy.framework.utils.common.StringRsaUtil;
-import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
@@ -23,15 +20,5 @@ public class ApplicationTest {
     public void testSelect() {
         List<User> userList = userMapper.selectList(null);
         userList.forEach(System.out::println);
-    }
-
-    @Autowired
-    private RedisWrapper redisWrapper;
-
-    @Test
-    public void redisTest() throws NoSuchAlgorithmException {
-        StringRsaUtil.Keys keys = StringRsaUtil.genKeyPair();
-        redisWrapper.set("publicKey", keys.getPublicKey());
-        redisWrapper.set("privateKey", keys.getPrivateKey());
     }
 }

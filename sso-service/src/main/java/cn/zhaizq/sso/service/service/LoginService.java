@@ -3,11 +3,11 @@ package cn.zhaizq.sso.service.service;
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ggboy.framework.common.exception.BusinessException;
 import com.ggboy.framework.utils.common.StringRsaUtil;
-import com.ggboy.framework.utils.redis.RedisWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -19,7 +19,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +33,7 @@ public class LoginService {
     private final static String publicKey = "publicKey";
 
     @Autowired
-    private RedisWrapper redisWrapper;
+    private JedisPool jedisPool;
     @Autowired
     private UserMapper userMapper;
 
@@ -55,25 +54,29 @@ public class LoginService {
     }
 
     public String getPublicKeyByName(String name) throws NoSuchAlgorithmException {
-        Map<String, String> keyMap = redisWrapper.getJedis().hgetAll(key);
+        try (Jedis jedis = jedisPool.getResource()) {
+            Map<String, String> keyMap = jedis.hgetAll(key);
 
-        if (keyMap == null || keyMap.isEmpty()) {
-            StringRsaUtil.Keys keys = StringRsaUtil.genKeyPair();
+            if (keyMap == null || keyMap.isEmpty()) {
+                StringRsaUtil.Keys keys = StringRsaUtil.genKeyPair();
 
-            keyMap = new HashMap<>();
-            keyMap.put(privateKey, keys.getPrivateKey());
-            keyMap.put(publicKey, keys.getPublicKey());
+                keyMap = new HashMap<>();
+                keyMap.put(privateKey, keys.getPrivateKey());
+                keyMap.put(publicKey, keys.getPublicKey());
 
-            redisWrapper.getJedis().hset(key, keyMap);
-            redisWrapper.expire(key, 300);
+                jedis.hset(key, keyMap);
+                jedis.expire(key, 300);
+            }
+
+            jedis.setex(buildBackupPrivateKey(name), 300, keyMap.get(privateKey));
+            return keyMap.get(publicKey);
         }
-
-        redisWrapper.set(buildBackupPrivateKey(name), keyMap.get(privateKey), 300);
-        return keyMap.get(publicKey);
     }
 
     private String getPrivateKeyByName(String name) {
-        return redisWrapper.get(buildBackupPrivateKey(name));
+        try (Jedis jedis = jedisPool.getResource()) {
+            return jedis.get(buildBackupPrivateKey(name));
+        }
     }
 
     private String buildBackupPrivateKey(String name) {
