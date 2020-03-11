@@ -15,7 +15,7 @@
     <button type="button">Login</button>
 </form>
 <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-<script src="http://passport.cnblogs.com/scripts/jsencrypt.min.js"></script>
+<script src="https://passport.cnblogs.com/scripts/jsencrypt.min.js"></script>
 <script>
     $(function() {
         $("button").click(function() {
@@ -51,7 +51,7 @@
                 dataType: "json",
                 success: function(result) {
                     if(result.code == '200'){
-                       location.href = "http://localhost?redirect="+getQueryVariable('redirect')+"&sso.token=" + result.data;
+                       location.href = "https://sso.zhaizq.cn?redirect="+getQueryVariable('redirect')+"&sso.token=" + result.data;
                     }else{
                         alert(result.code);
                     }
