@@ -5,12 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SsoCheckTokenRequest {
+public class SsoCheckTokenRequest extends SsoBaseRequest {
     private String token;
 
-    public static SsoCheckTokenRequest build(String token) {
-        SsoCheckTokenRequest ssoCheckTokenRequest = new SsoCheckTokenRequest();
-        ssoCheckTokenRequest.setToken(token);
-        return ssoCheckTokenRequest;
+    public SsoCheckTokenRequest(String token) {
+        this.token = token;
     }
 }

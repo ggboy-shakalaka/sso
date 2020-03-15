@@ -37,10 +37,6 @@ public class SsoHelper {
         response.addCookie(cookie);
     }
 
-    public static String doJsonRequest(String path, String request) throws IOException {
-        return StringSimpleHttp.startDefaultRequest(path).doPost(StringSimpleHttp.buildJsonEntity(request));
-    }
-
     public static String getRootPath(HttpServletRequest request) {
         return request.getRequestURL().substring(0, request.getRequestURL().length() - request.getRequestURI().length());
     }

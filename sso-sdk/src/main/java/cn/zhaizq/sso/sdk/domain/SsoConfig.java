@@ -14,25 +14,10 @@ public class SsoConfig {
     private String server;
     private String appId;
     private String loginUrl;
+    private String privateKey;
     private String[] ignore = {};
 
     private ServerConfig serverConfig;
-
-    public String getQueryConfigUrl() {
-        return server + "/api/appId/query_config";
-    }
-
-    public String getCheckTokenUrl() {
-        return server + serverConfig.getCheckTokenPath();
-    }
-
-    public String getServerLoginUrl() {
-        return server + serverConfig.getLoginPath();
-    }
-
-    public String getServerLogoutUrl() {
-        return server + serverConfig.getLogoutPath();
-    }
 
     public String getRefreshTokenUrl(String redirect) {
         String url = serverConfig.getServerUrl() + serverConfig.getRefreshTokenPath();
@@ -40,6 +25,7 @@ public class SsoConfig {
         URIBuilder builder = new URIBuilder(URI.create(url));
         builder.addParameter(SsoConstant.LOGIN_URL, loginUrl);
         builder.addParameter(SsoConstant.REDIRECT, redirect);
+        builder.addParameter(SsoConstant.APP_ID, appId);
 
         return builder.toString();
     }
@@ -48,9 +34,6 @@ public class SsoConfig {
     @Setter
     public final static class ServerConfig {
         private String serverUrl;
-        private String loginPath;
-        private String logoutPath;
         private String refreshTokenPath;
-        private String checkTokenPath;
     }
 }

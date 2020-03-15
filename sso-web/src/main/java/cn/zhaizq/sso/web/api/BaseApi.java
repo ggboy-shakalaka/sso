@@ -1,13 +1,14 @@
 package cn.zhaizq.sso.web.api;
 
+import cn.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
 import cn.zhaizq.sso.web.utils.ValidateUtil;
 import com.ggboy.framework.common.exception.BusinessException;
 
 import java.lang.reflect.ParameterizedType;
 
-public abstract class BaseApi<T extends BaseApiParam> {
+public abstract class BaseApi<T extends SsoBaseRequest> {
     @SuppressWarnings("unchecked")
-    public Object service(BaseApiParam data) {
+    public Object service(SsoBaseRequest data) throws Exception {
         verify((T) data);
         return doService((T) data);
     }
@@ -16,7 +17,7 @@ public abstract class BaseApi<T extends BaseApiParam> {
         ValidateUtil.validate(data);
     }
 
-    abstract Object doService(T data);
+    abstract Object doService(T data) throws Exception;
 
     @SuppressWarnings("unchecked")
     public Class<T> getParamClass() {

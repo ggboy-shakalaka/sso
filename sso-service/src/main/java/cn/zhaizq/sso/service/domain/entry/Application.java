@@ -1,5 +1,6 @@
 package cn.zhaizq.sso.service.domain.entry;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
+@TableName("basic_application")
 public class Application {
     private Integer id;
     private String appId;

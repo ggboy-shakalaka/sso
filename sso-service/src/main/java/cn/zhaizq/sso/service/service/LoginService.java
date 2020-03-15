@@ -37,7 +37,13 @@ public class LoginService {
     @Autowired
     private UserMapper userMapper;
 
-    public User doLogin(String name, String password) throws NoSuchAlgorithmException {
+    public User login(String name, String encryptedPassword) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
+        String privateKey = getPrivateKeyByName(name);
+        String password = StringRsaUtil.decryptByPrivateKey(encryptedPassword, privateKey);
+        return doLogin(name, password);
+    }
+
+    private User doLogin(String name, String password) throws NoSuchAlgorithmException {
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         userQueryWrapper.eq("user_name", name);
         User user = userMapper.selectOne(userQueryWrapper);
@@ -45,12 +51,6 @@ public class LoginService {
             return user;
         }
         return null;
-    }
-
-    public User login(String name, String encryptedPassword) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
-        String privateKey = getPrivateKeyByName(name);
-        String password = StringRsaUtil.decryptByPrivateKey(encryptedPassword, privateKey);
-        return doLogin(name, password);
     }
 
     public String getPublicKeyByName(String name) throws NoSuchAlgorithmException {
@@ -87,5 +87,9 @@ public class LoginService {
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         md5.update(str.getBytes());
         return new BigInteger(1, md5.digest()).toString(16);
+    }
+
+    public User getUserByToken(String token) {
+        return null;
     }
 }

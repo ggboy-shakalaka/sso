@@ -1,16 +1,16 @@
 package cn.zhaizq.sso.web.controller.abc;
 
+import cn.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
+import cn.zhaizq.sso.sdk.domain.request.SsoRequestHeader;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import cn.zhaizq.sso.service.domain.entry.Application;
 import cn.zhaizq.sso.service.service.ApplicationService;
 import cn.zhaizq.sso.web.api.BaseApi;
-import cn.zhaizq.sso.web.api.BaseApiParam;
 import cn.zhaizq.sso.web.controller.BaseController;
-import cn.zhaizq.sso.web.enums.Format;
-import cn.zhaizq.sso.web.enums.SignType;
+import cn.zhaizq.sso.web.enums.RequestFormat;
 import cn.zhaizq.sso.web.utils.ValidateUtil;
 import com.ggboy.framework.common.exception.BusinessException;
-import lombok.Getter;
+import com.ggboy.framework.utils.common.StringRsaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Slf4j
@@ -49,45 +46,38 @@ public class ApiControllerOld extends BaseController {
         }
     }
 
-    public Object doAction(String body) {
-        String sign = request.getHeader("sign");
-        String app_id = request.getHeader("app_id");
-        String method = request.getHeader("method");
-        String format = request.getHeader("format");
-        String sign_type = request.getHeader("sign_type");
-        String timestamp = request.getHeader("timestamp");
+    public Object doAction(String body) throws Exception {
+        RequestFormat requestFormat = RequestFormat.valueOof(request.getContentType());
+        if (requestFormat == null)
+            throw new BusinessException("请求格式[" + request.getContentType() + "]不支持");
 
-        try {
-            if (System.currentTimeMillis() - Long.parseLong(timestamp) > TIMESTAMP_TIME_OUT)
-                throw new BusinessException("请求已过期");
-        } catch (Exception e) {
-            throw new BusinessException("时间戳解析失败");
-        }
+        SsoBaseRequest ssoBaseRequest = requestFormat.parse(body, SsoBaseRequest.class);
 
-        Application application = applicationService.query(app_id);
+        ValidateUtil.validate(ssoBaseRequest);
+
+        SsoRequestHeader header = ssoBaseRequest.getHeader();
+
+        if (System.currentTimeMillis() - header.getTimestamp() > TIMESTAMP_TIME_OUT)
+            throw new BusinessException("请求已过期");
+
+        Application application = applicationService.query(header.getApp_id());
         if (application == null)
-            throw new BusinessException("应用[" + app_id + "]未注册");
+            throw new BusinessException("应用[" + header.getApp_id() + "]未注册");
 
         // 验签
-        SignType.valueOf(sign_type);
         try {
-            SignType.valueOf(sign_type).verify(timestamp + body, sign, application.getPublicKey());
-        }catch (Exception e) {
-            throw new BusinessException("应用[" + app_id + "]未注册");
+            if (!StringRsaUtil.verify(header.getTimestamp() + body, header.getSign(), application.getPublicKey()))
+                throw new BusinessException("验签失败");
+        } catch (Exception e) {
+            throw new BusinessException("验签失败");
         }
         // TODO 鉴权 (暂时不需要)
 
-        BaseApi<?> api = apiMap.get(method);
-        if (api == null) {
-            throw new BusinessException("服务[" + method + "]不存在");
-        }
+        BaseApi<?> api = apiMap.get(header.getMethod());
+        if (api == null)
+            throw new BusinessException("服务[" + header.getMethod() + "]不存在");
 
-        try {
-            BaseApiParam parse = Format.valueOf(format).parse(body, api.getParamClass());
-            parse.setAppId(app_id);
-            return api.service(parse);
-        } catch (Exception e) {
-            throw new BusinessException("");
-        }
+        ssoBaseRequest = requestFormat.parse(body, api.getParamClass());
+        return api.service(ssoBaseRequest);
     }
 }

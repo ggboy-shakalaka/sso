@@ -1,8 +1,8 @@
 package cn.zhaizq.sso.sdk;
 
-import cn.zhaizq.sso.sdk.domain.SsoConfig;
 import cn.zhaizq.sso.sdk.domain.SsoUser;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
+import lombok.SneakyThrows;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +16,7 @@ public class SsoFilter implements Filter {
         this.ssoApi = ssoApi;
     }
 
+    @SneakyThrows
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;

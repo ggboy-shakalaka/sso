@@ -47,8 +47,8 @@ public class WebConfig {
     private SsoConfig ssoConfig;
 
     @Bean
-    public SsoApi ssoApi() throws IOException {
-        return SsoApi.init(ssoConfig);
+    public SsoApi ssoApi() throws Exception {
+        return new SsoApi(ssoConfig);
     }
 
     @Bean

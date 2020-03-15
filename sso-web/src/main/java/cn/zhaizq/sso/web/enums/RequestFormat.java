@@ -2,7 +2,7 @@ package cn.zhaizq.sso.web.enums;
 
 import com.ggboy.framework.common.exception.BusinessException;
 
-public enum Format {
+public enum RequestFormat {
     XML("application/xml") {
         public <T> T parse(String data, Class<T> clazz) {
             throw new BusinessException("请求格式暂不支持");
@@ -14,7 +14,11 @@ public enum Format {
     },
     JSON("application/json") {
         public <T> T parse(String data, Class<T> clazz) {
-            return com.alibaba.fastjson.JSON.parseObject(data, clazz);
+            try {
+                return com.alibaba.fastjson.JSON.parseObject(data, clazz);
+            } catch (Exception e) {
+                throw new BusinessException("请求字段解析失败");
+            }
         }
 
         public String format(Object object) {
@@ -24,13 +28,16 @@ public enum Format {
     ;
 
     private String mimeType;
-    Format(String mimeType) {
+    RequestFormat(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    public static Format valueOof(String mimeType) {
-        for (Format item : Format.values()) {
-            if (item.mimeType.equals(mimeType))
+    public static RequestFormat valueOof(String mimeType) {
+        if (mimeType == null)
+            return null;
+
+        for (RequestFormat item : RequestFormat.values()) {
+            if (mimeType.startsWith(item.mimeType))
                 return item;
         }
         return null;
