@@ -21,6 +21,6 @@ public class QueryLoginPublicKeyApi extends BaseApi<SsoQueryLoginPublicKeyReques
     @Override
     Object doService(SsoQueryLoginPublicKeyRequest data) throws NoSuchAlgorithmException {
         String publicKey = loginService.getPublicKeyByName(data.getName());
-        return new SsoResponse<String>().code(200).data(publicKey);
+        return new SsoResponse().code(200).data(publicKey);
     }
 }

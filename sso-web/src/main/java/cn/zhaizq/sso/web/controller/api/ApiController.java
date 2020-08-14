@@ -1,4 +1,4 @@
-package cn.zhaizq.sso.web.controller.abc;
+package cn.zhaizq.sso.web.controller.api;
 
 import cn.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
 import cn.zhaizq.sso.sdk.domain.request.SsoRequestHeader;
@@ -17,32 +17,34 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/api")
-public class ApiControllerOld extends BaseController {
+public class ApiController extends BaseController {
     private final static int TIMESTAMP_TIME_OUT = 60 * 1000;
 
+    @Autowired
+    private JedisPool jedisPool;
     @Autowired
     private Map<String, BaseApi<?>> apiMap;
     @Autowired
     private ApplicationService applicationService;
 
     @PostMapping
-    public SsoResponse<?> action(@RequestBody(required = false) String body) {
+    public SsoResponse action(@RequestBody(required = false) String body) {
         try {
             Object data = doAction(body);
-            return new SsoResponse<>().code(200).data(data);
-
+            return new SsoResponse().code(200).data(data);
         } catch (BusinessException e) {
-            return new SsoResponse<>().code(400).message(e.getMessage());
-
+            return new SsoResponse().code(400).message(e.getMessage());
         } catch (Exception e) {
             log.error("系统内部错误", e);
-            return new SsoResponse<>().code(500).message("系统内部错误");
+            return new SsoResponse().code(500).message("系统内部错误");
         }
     }
 
@@ -51,14 +53,22 @@ public class ApiControllerOld extends BaseController {
         if (requestFormat == null)
             throw new BusinessException("请求格式[" + request.getContentType() + "]不支持");
 
-        SsoBaseRequest ssoBaseRequest = requestFormat.parse(body, SsoBaseRequest.class);
+        SsoBaseRequest ssoRequest = requestFormat.parse(body, SsoBaseRequest.class);
 
-        ValidateUtil.validate(ssoBaseRequest);
+        ValidateUtil.validate(ssoRequest);
 
-        SsoRequestHeader header = ssoBaseRequest.getHeader();
+        SsoRequestHeader header = ssoRequest.getHeader();
 
-        if (System.currentTimeMillis() - header.getTimestamp() > TIMESTAMP_TIME_OUT)
+        try (Jedis jedis = jedisPool.getResource()) {
+            if (jedis.setnx(header.getRequest_id(), "blah") != 0)
+                jedis.pexpire(header.getRequest_id(), TIMESTAMP_TIME_OUT);
+            else
+                throw new BusinessException("重复请求");
+        }
+
+        if (System.currentTimeMillis() - header.getTimestamp() > TIMESTAMP_TIME_OUT) {
             throw new BusinessException("请求已过期");
+        }
 
         Application application = applicationService.query(header.getApp_id());
         if (application == null)
@@ -66,10 +76,10 @@ public class ApiControllerOld extends BaseController {
 
         // 验签
         try {
-            if (!StringRsaUtil.verify(header.getTimestamp() + body, header.getSign(), application.getPublicKey()))
+            if (!StringRsaUtil.verify(body, request.getHeader("sign"), application.getPublicKey()))
                 throw new BusinessException("验签失败");
         } catch (Exception e) {
-            throw new BusinessException("验签失败");
+//            throw new BusinessException("验签失败");
         }
         // TODO 鉴权 (暂时不需要)
 
@@ -77,7 +87,7 @@ public class ApiControllerOld extends BaseController {
         if (api == null)
             throw new BusinessException("服务[" + header.getMethod() + "]不存在");
 
-        ssoBaseRequest = requestFormat.parse(body, api.getParamClass());
-        return api.service(ssoBaseRequest);
+        ssoRequest = requestFormat.parse(body, api.getParamClass());
+        return api.service(ssoRequest);
     }
 }

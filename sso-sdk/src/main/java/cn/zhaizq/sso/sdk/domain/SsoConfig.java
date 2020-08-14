@@ -11,6 +11,7 @@ import java.net.URI;
 @Setter
 public class SsoConfig {
     private boolean local = false;
+    private String logger;
     private String server;
     private String appId;
     private String loginUrl;

@@ -1,6 +1,5 @@
 package cn.zhaizq.sso.sdk;
 
-import cn.zhaizq.sso.sdk.domain.SsoUser;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import lombok.SneakyThrows;
 
@@ -10,13 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class SsoFilter implements Filter {
-    private SsoApi ssoApi;
+    private SsoService ssoService;
 
-    public SsoFilter(SsoApi ssoApi) {
-        this.ssoApi = ssoApi;
+    public SsoFilter(SsoService ssoService) {
+        this.ssoService = ssoService;
     }
 
-    @SneakyThrows
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
@@ -24,11 +22,9 @@ public class SsoFilter implements Filter {
         String requestUri = request.getRequestURI();
         String token = SsoHelper.getSsoToken(request);
 
-        for (String ignoreUrl : ssoApi.getConfig().getIgnore()) {
-            if (SsoHelper.isMatch(ignoreUrl, requestUri)) {
-                filterChain.doFilter(servletRequest, servletResponse);
-                return;
-            }
+        if (ssoService.isMatchIgnore(requestUri)) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
         }
 
         if (request.getParameter(SsoConstant.TOKEN_NAME) != null) {
@@ -37,10 +33,11 @@ public class SsoFilter implements Filter {
             return;
         }
 
-        SsoResponse<SsoUser> resp = ssoApi.checkToken(token);
+        SsoResponse resp = ssoService.checkToken(token);
 
         if (resp.getCode() != 200) {
-            response.sendRedirect(ssoApi.getConfig().getRefreshTokenUrl(SsoHelper.getRootPath(request)));
+            response.sendRedirect("/");
+//            response.sendRedirect(ssoApi.getConfig().getRefreshTokenUrl(SsoHelper.getRootPath(request)));
             return;
         }
 
@@ -49,7 +46,9 @@ public class SsoFilter implements Filter {
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
+    @SneakyThrows
     public void init(FilterConfig filterConfig) throws ServletException {
+//        ssoService.helloWorld();
     }
 
     public void destroy() {

@@ -1,11 +1,8 @@
 package cn.zhaizq.sso.sdk;
 
-import com.ggboy.framework.utils.httputil.StringSimpleHttp;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class SsoHelper {
     public static boolean isMatch(String pattern, String path) {

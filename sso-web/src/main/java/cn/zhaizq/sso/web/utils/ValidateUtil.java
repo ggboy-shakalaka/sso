@@ -20,11 +20,13 @@ public class ValidateUtil {
                 .getValidator();
     }
 
-    public static <T> void validate(T value) throws BusinessException {
-        Set<ConstraintViolation<T>> result = validator.validate(value);
+    public static void validate(Object value) throws BusinessException {
+        Set<ConstraintViolation<Object>> result = validator.validate(value);
 
-        if (result != null && result.size() > 0)
-            for (ConstraintViolation<T> c : result)
-                throw new BusinessException("字段[" + c.getPropertyPath() + "]" + c.getMessage());
+        if (result == null || result.isEmpty())
+            return;
+
+        for (ConstraintViolation<Object> c : result)
+            throw new BusinessException("字段[" + c.getPropertyPath() + "]" + c.getMessage());
     }
 }

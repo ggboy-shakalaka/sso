@@ -21,7 +21,7 @@ public class CheckTokenApi extends BaseApi<SsoCheckTokenRequest> {
     Object doService(SsoCheckTokenRequest data) {
         User user = loginService.getUserByToken(data.getToken());
         if (user == null)
-            return new SsoResponse<SsoUser>().code(400);
+            return new SsoResponse().code(400);
 
         SsoUser ssoUser = new SsoUser();
         ssoUser.setId(user.getId());

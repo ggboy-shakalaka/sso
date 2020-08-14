@@ -1,12 +1,9 @@
-package cn.zhaizq.sso.web.controller.abc;
+package cn.zhaizq.sso.web.controller.api;
 
 import cn.zhaizq.sso.sdk.SsoConstant;
 import cn.zhaizq.sso.sdk.SsoHelper;
 import cn.zhaizq.sso.sdk.domain.SsoConfig;
-import cn.zhaizq.sso.sdk.domain.SsoUser;
-import cn.zhaizq.sso.sdk.domain.request.SsoCheckTokenRequest;
 import cn.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
-import cn.zhaizq.sso.sdk.domain.request.SsoLogoutRequest;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.service.LoginService;
@@ -16,7 +13,6 @@ import cn.zhaizq.sso.web.controller.BaseController;
 import com.ggboy.framework.common.exception.BusinessException;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
@@ -30,10 +26,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/{appId}")
-public class ApiController extends BaseController {
-    @Autowired
-    private SsoConfig ssoConfig;
+@RequestMapping("/api/login")
+public class LoginController extends BaseController {
     @Autowired
     private UserCache userCache;
     @Autowired
@@ -41,17 +35,8 @@ public class ApiController extends BaseController {
     @Autowired
     private LoginService loginService;
 
-    @PostMapping("/query_config")
-    public SsoResponse<SsoConfig.ServerConfig> query_config(@PathVariable String appId) {
-        SsoConfig.ServerConfig config = new SsoConfig.ServerConfig();
-        config.setServerUrl(ssoConfig.getServerConfig().getServerUrl());
-        config.setRefreshTokenPath(String.format("/api/%s/refresh_token", appId));
-
-        return new SsoResponse<SsoConfig.ServerConfig>().code(200).data(config);
-    }
-
     @GetMapping("/refresh_token")
-    public void refresh_token(@PathVariable String appId, @RequestParam String redirect, @RequestParam String login_url) throws IOException {
+    public void refresh_token(@RequestParam String app_id, @RequestParam String redirect, @RequestParam String login_url) throws IOException {
         String token = SsoHelper.getSsoToken(request);
 
         if (token != null && userCache.get(token) != null) {
@@ -68,7 +53,32 @@ public class ApiController extends BaseController {
 
         URIBuilder uri = new URIBuilder(URI.create("/api/login.html"));
         uri.addParameter(SsoConstant.REDIRECT, redirect);
-        uri.addParameter("appId", appId);
+        uri.addParameter("appId", app_id);
         response.sendRedirect(uri.toString());
+    }
+
+    @GetMapping("/public_key")
+    public SsoResponse public_key(@RequestParam String name) throws NoSuchAlgorithmException {
+        String publicKey = loginService.getPublicKeyByName(name);
+        return new SsoResponse().code(200).data(publicKey);
+    }
+
+    @PostMapping("/do_login")
+    @ResponseBody
+    public SsoResponse do_login(@PathVariable String appId, @RequestBody SsoLoginRequest loginRequest) throws BadPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, IOException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
+        User user = loginService.login(loginRequest.getName(), loginRequest.getPassword());
+
+        if (user == null) {
+            throw new BusinessException("用户名或密码错误");
+        }
+
+        String ssoToken = tokenCache.get(loginRequest.getName());
+        if (ssoToken == null) {
+            tokenCache.put(loginRequest.getName(), ssoToken = UUID.randomUUID().toString());
+        }
+
+        userCache.put(ssoToken, user);
+
+        return new SsoResponse().code(200).data(ssoToken);
     }
 }

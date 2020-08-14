@@ -11,6 +11,6 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {"cn.zhaizq.sso"})
 public class Application extends SpringBootServletInitializer {
 	public static void main(String[] args) {
-        new SpringApplication(Application.class).run();
+		new SpringApplication(Application.class).run();
 	}
 }

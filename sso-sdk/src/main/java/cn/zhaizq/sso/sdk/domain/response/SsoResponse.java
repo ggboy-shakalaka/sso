@@ -1,27 +1,26 @@
 package cn.zhaizq.sso.sdk.domain.response;
 
+import com.alibaba.fastjson.JSON;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public class SsoResponse<T> {
+public class SsoResponse {
     private Integer code;
     private String message;
-    private T data;
+    private String data;
 
-    public SsoResponse<T> code(Integer code) {
+    public SsoResponse code(Integer code) {
         this.code = code;
         return this;
     }
 
-    public SsoResponse<T> message(String message) {
+    public SsoResponse message(String message) {
         this.message = message;
         return this;
     }
 
-    public SsoResponse<T> data(T data) {
-        this.data = data;
+    public SsoResponse data(Object data) {
+        this.data = JSON.toJSONString(data);
         return this;
     }
 }
