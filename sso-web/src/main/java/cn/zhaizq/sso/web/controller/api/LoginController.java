@@ -1,8 +1,8 @@
 package cn.zhaizq.sso.web.controller.api;
 
+import cn.zhaizq.sso.common.exception.BusinessException;
 import cn.zhaizq.sso.sdk.SsoConstant;
 import cn.zhaizq.sso.sdk.SsoHelper;
-import cn.zhaizq.sso.sdk.domain.SsoConfig;
 import cn.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import cn.zhaizq.sso.service.domain.entry.User;
@@ -10,7 +10,6 @@ import cn.zhaizq.sso.service.service.LoginService;
 import cn.zhaizq.sso.web.cache.TokenCache;
 import cn.zhaizq.sso.web.cache.UserCache;
 import cn.zhaizq.sso.web.controller.BaseController;
-import com.ggboy.framework.common.exception.BusinessException;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

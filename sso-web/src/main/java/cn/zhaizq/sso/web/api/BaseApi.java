@@ -1,8 +1,8 @@
 package cn.zhaizq.sso.web.api;
 
+import cn.zhaizq.sso.common.exception.BusinessException;
 import cn.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
 import cn.zhaizq.sso.web.utils.ValidateUtil;
-import com.ggboy.framework.common.exception.BusinessException;
 
 import java.lang.reflect.ParameterizedType;
 

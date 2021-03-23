@@ -3,7 +3,6 @@ package cn.zhaizq.sso.service.service;
 import cn.zhaizq.sso.service.domain.entry.User;
 import cn.zhaizq.sso.service.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.ggboy.framework.utils.common.StringRsaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;

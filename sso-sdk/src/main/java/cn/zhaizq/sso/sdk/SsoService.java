@@ -5,8 +5,6 @@ import cn.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.ggboy.framework.utils.common.StringRsaUtil;
-import com.ggboy.framework.utils.common.UuidUtil;
 
 import java.net.URI;
 import java.net.http.HttpClient;

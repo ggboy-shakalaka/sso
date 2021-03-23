@@ -15,17 +15,23 @@ public class SsoHelper {
         return path.equals(pattern) || path.startsWith(pattern + "/");
     }
 
-    public static String getSsoToken(HttpServletRequest request) {
+    public static Cookie getSsoToken(HttpServletRequest request) {
         if (request == null || request.getCookies() == null)
             return null;
 
         for (Cookie cookie : request.getCookies()) {
             if (SsoConstant.TOKEN_NAME.equals(cookie.getName())) {
-                return cookie.getValue();
+                cookie.setHttpOnly(true);
+                return cookie;
             }
         }
 
         return null;
+    }
+
+    public static String getSsoTokenString(HttpServletRequest request) {
+        Cookie cookie = getSsoToken(request);
+        return cookie == null ? null : cookie.getValue();
     }
 
     public static void setSsoToken(HttpServletResponse response, String token) {

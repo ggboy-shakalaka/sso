@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://passport.cnblogs.com/scripts/jsencrypt.min.js"></script>
+<script>
+    $(function () {
+        $.ajax({
+            url: '/test',
+            method: 'GET',
+            success: function (result) {
+                console.log(result)
+            }
+        });
+    });
+</script>
+</body>
+</html>

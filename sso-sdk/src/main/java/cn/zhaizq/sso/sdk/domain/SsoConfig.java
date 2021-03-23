@@ -1,11 +1,7 @@
 package cn.zhaizq.sso.sdk.domain;
 
-import cn.zhaizq.sso.sdk.SsoConstant;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.http.client.utils.URIBuilder;
-
-import java.net.URI;
 
 @Getter
 @Setter
@@ -23,12 +19,13 @@ public class SsoConfig {
     public String getRefreshTokenUrl(String redirect) {
         String url = serverConfig.getServerUrl() + serverConfig.getRefreshTokenPath();
 
-        URIBuilder builder = new URIBuilder(URI.create(url));
-        builder.addParameter(SsoConstant.LOGIN_URL, loginUrl);
-        builder.addParameter(SsoConstant.REDIRECT, redirect);
-        builder.addParameter(SsoConstant.APP_ID, appId);
-
-        return builder.toString();
+//        URIBuilder builder = new URIBuilder(URI.create(url));
+//        builder.addParameter(SsoConstant.LOGIN_URL, loginUrl);
+//        builder.addParameter(SsoConstant.REDIRECT, redirect);
+//        builder.addParameter(SsoConstant.APP_ID, appId);
+//
+//        return builder.toString();
+        return null;
     }
 
     @Getter

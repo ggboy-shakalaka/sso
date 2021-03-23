@@ -1,8 +1,0 @@
-POST https://wms.dongdamen.net/registerUserForSso
-Content-Type: application/json
-
-{
-  "msg": "hello"
-}
-
-###

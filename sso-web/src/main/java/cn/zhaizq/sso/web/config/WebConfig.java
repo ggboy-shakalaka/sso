@@ -39,7 +39,7 @@ public class WebConfig {
 
             // Spring 静态资源映射
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//                registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
+                registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
             }
 
 //            @Override

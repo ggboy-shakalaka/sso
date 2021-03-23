@@ -1,5 +1,6 @@
 package cn.zhaizq.sso.web.controller.api;
 
+import cn.zhaizq.sso.common.exception.BusinessException;
 import cn.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
 import cn.zhaizq.sso.sdk.domain.request.SsoRequestHeader;
 import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
@@ -9,8 +10,6 @@ import cn.zhaizq.sso.web.api.BaseApi;
 import cn.zhaizq.sso.web.controller.BaseController;
 import cn.zhaizq.sso.web.enums.RequestFormat;
 import cn.zhaizq.sso.web.utils.ValidateUtil;
-import com.ggboy.framework.common.exception.BusinessException;
-import com.ggboy.framework.utils.common.StringRsaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

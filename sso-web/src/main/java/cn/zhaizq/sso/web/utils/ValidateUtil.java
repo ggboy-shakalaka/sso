@@ -1,6 +1,6 @@
 package cn.zhaizq.sso.web.utils;
 
-import com.ggboy.framework.common.exception.BusinessException;
+import cn.zhaizq.sso.common.exception.BusinessException;
 import org.hibernate.validator.HibernateValidator;
 
 import javax.validation.ConstraintViolation;

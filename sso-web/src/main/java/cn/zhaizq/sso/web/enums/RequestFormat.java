@@ -1,6 +1,7 @@
 package cn.zhaizq.sso.web.enums;
 
-import com.ggboy.framework.common.exception.BusinessException;
+
+import cn.zhaizq.sso.common.exception.BusinessException;
 
 public enum RequestFormat {
     XML("application/xml") {
