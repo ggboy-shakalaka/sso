@@ -21,7 +21,6 @@ public class SsoHelper {
 
         for (Cookie cookie : request.getCookies()) {
             if (SsoConstant.TOKEN_NAME.equals(cookie.getName())) {
-                cookie.setHttpOnly(true);
                 return cookie;
             }
         }

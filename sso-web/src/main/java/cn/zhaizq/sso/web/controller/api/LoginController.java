@@ -36,7 +36,7 @@ public class LoginController extends BaseController {
 
     @GetMapping("/refresh_token")
     public void refresh_token(@RequestParam String app_id, @RequestParam String redirect, @RequestParam String login_url) throws IOException {
-        String token = SsoHelper.getSsoToken(request);
+        String token = SsoHelper.getSsoToken(request).getValue();
 
         if (token != null && userCache.get(token) != null) {
             URIBuilder uri = new URIBuilder(URI.create(redirect));

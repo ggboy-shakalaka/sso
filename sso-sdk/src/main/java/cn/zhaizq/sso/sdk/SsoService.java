@@ -6,10 +6,8 @@ import cn.zhaizq.sso.sdk.domain.response.SsoResponse;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
+import javax.servlet.http.Cookie;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class SsoService {
@@ -29,8 +27,8 @@ public class SsoService {
         return null;
     }
 
-    public SsoResponse checkToken(String token) {
-        return new SsoResponse().code(200);
+    public SsoResponse checkToken(Cookie tokenCookie) {
+        return new SsoResponse().code(400);
     }
 
     public SsoResponse queryLoginPublicKey(String name) throws Exception {
@@ -54,39 +52,38 @@ public class SsoService {
     }
 
     private class SsoClient {
-        private HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build();
-
         public SsoResponse request(String method, String request) throws Exception {
             return JSON.parseObject(doRequest(method, request), SsoResponse.class);
         }
 
         public String doRequest(String method, String request) throws Exception {
-            request = request == null ? "" : request;
-            long timestamp = System.currentTimeMillis();
-            String requestId = UuidUtil.random();
-            String sign = StringRsaUtil.sign(timestamp + requestId + request, ssoConfig.getPrivateKey());
-
-            String response = null;
-            Exception exception = null;
-
-            HttpRequest httpRequest = HttpRequest.newBuilder()
-                    .version(HttpClient.Version.HTTP_2)
-                    .uri(URI.create(ssoConfig.getServer()))
-                    .header("Content-Type", "application/json")
-                    .header("request_id", requestId)
-                    .header("timestamp", String.valueOf(timestamp))
-                    .header("sign", sign)
-                    .header("app_id", ssoConfig.getAppId())
-                    .header("method", method)
-                    .POST(HttpRequest.BodyPublishers.ofString(request))
-                    .build();
-            try {
-                return response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-            } catch (Exception e) {
-                throw exception = e;
-            } finally {
-                doLog(request, response, exception, System.currentTimeMillis() - timestamp);
-            }
+//            request = request == null ? "" : request;
+//            long timestamp = System.currentTimeMillis();
+//            String requestId = UuidUtil.random();
+//            String sign = StringRsaUtil.sign(timestamp + requestId + request, ssoConfig.getPrivateKey());
+//
+//            String response = null;
+//            Exception exception = null;
+//
+//            HttpRequest httpRequest = HttpRequest.newBuilder()
+//                    .version(HttpClient.Version.HTTP_2)
+//                    .uri(URI.create(ssoConfig.getServer()))
+//                    .header("Content-Type", "application/json")
+//                    .header("request_id", requestId)
+//                    .header("timestamp", String.valueOf(timestamp))
+//                    .header("sign", sign)
+//                    .header("app_id", ssoConfig.getAppId())
+//                    .header("method", method)
+//                    .POST(HttpRequest.BodyPublishers.ofString(request))
+//                    .build();
+//            try {
+//                return response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
+//            } catch (Exception e) {
+//                throw exception = e;
+//            } finally {
+//                doLog(request, response, exception, System.currentTimeMillis() - timestamp);
+//            }
+            return null;
         }
 
         private void doLog(String request, String response, Exception e, Long time) {

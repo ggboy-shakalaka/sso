@@ -12,7 +12,7 @@ public class SsoConfig {
     private String appId;
     private String loginUrl;
     private String privateKey;
-    private String[] ignore = {};
+    private String[] ignore = {"/uncheck"};
 
     private ServerConfig serverConfig;
 

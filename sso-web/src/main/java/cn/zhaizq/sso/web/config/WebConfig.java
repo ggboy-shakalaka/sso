@@ -57,14 +57,14 @@ public class WebConfig {
 //        return new SsoService(ssoConfig);
 //    }
 
-//    @Bean
-//    public FilterRegistrationBean<SsoFilter> ssoFilter(SsoService ssoService) throws IOException {
-//        FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-//        filterRegistrationBean.setFilter(new SsoFilter(ssoService));
-//        filterRegistrationBean.addUrlPatterns("/*");
-//        filterRegistrationBean.setEnabled(true);
-//        return filterRegistrationBean;
-//    }
+    @Bean
+    public FilterRegistrationBean<SsoFilter> ssoFilter() throws IOException {
+        FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
+        filterRegistrationBean.setFilter(new SsoFilter(new SsoConfig()));
+        filterRegistrationBean.addUrlPatterns("/*");
+        filterRegistrationBean.setEnabled(true);
+        return filterRegistrationBean;
+    }
 
     @Autowired
     private RedisProperties redisConfig;

@@ -8,17 +8,22 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class SsoFilter implements Filter {
+    private final SsoConfig ssoConfig;
     private final SsoService ssoService;
 
     public SsoFilter(SsoConfig ssoConfig) {
+        this.ssoConfig = ssoConfig;
         this.ssoService = new SsoService(ssoConfig);
     }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
     }
 
     @Override
@@ -26,38 +31,49 @@ public class SsoFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        String requestUri = request.getRequestURI();
-        Cookie tokenCookie = SsoHelper.getSsoToken(request);
-        SsoHelper.setSsoToken(response, request.getParameter(SsoConstant.TOKEN_NAME));
-        if (tokenCookie != null && !tokenCookie.isHttpOnly())
-            response.addCookie(tokenCookie);
 
+        String token = request.getParameter(SsoConstant.TOKEN_NAME);
+        if (token != null) {
+            response.addCookie(new Cookie(SsoConstant.TOKEN_NAME, token));
+            response.sendRedirect(request.getRequestURI()); // TODO remove url param(token) and redirect url
+            return;
+        }
+
+        String requestUri = request.getRequestURI();
         if (ssoService.isMatchIgnore(requestUri)) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        if (request.getParameter(SsoConstant.TOKEN_NAME) != null) {
-            // remove url param(token) and redirect url
-            SsoHelper.setSsoToken(response, request.getParameter(SsoConstant.TOKEN_NAME));
-            response.sendRedirect(request.getParameter(SsoConstant.REDIRECT) == null ? "/" : request.getParameter(SsoConstant.REDIRECT));
-            return;
-        }
-
-        SsoResponse resp = ssoService.checkToken(tokenCookie == null ? null : tokenCookie.getValue());
+        Cookie tokenCookie = getCookie(request, SsoConstant.TOKEN_NAME);
+        SsoResponse resp = ssoService.checkToken(tokenCookie);
 
         if (resp.getCode() != 200) {
             // redirect to Refresh Token
+            String redirect = request.getRequestURL() + "?" + request.getQueryString();
+            String redirectUrl = "http://sso.com/uncheck/refresh?appKey=" + ssoConfig.getAppId() + "&redirect=" + URLEncoder.encode(redirect, "UTF-8");
+            response.sendRedirect(redirectUrl);
             return;
         }
 
         request.setAttribute(SsoConstant.SSO_USER, resp.getData());
-
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
     @Override
     public void destroy() {
+    }
 
+    public static Cookie getCookie(HttpServletRequest request, String cookieName) {
+        if (request == null || request.getCookies() == null || cookieName == null)
+            return null;
+
+        for (Cookie cookie : request.getCookies()) {
+            if (cookieName.equals(cookie.getName())) {
+                return cookie;
+            }
+        }
+
+        return null;
     }
 }
