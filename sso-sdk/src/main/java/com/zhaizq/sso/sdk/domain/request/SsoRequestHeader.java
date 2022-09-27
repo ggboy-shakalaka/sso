@@ -9,12 +9,5 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class SsoRequestHeader {
-    @NotEmpty
-    private String request_id;
-    @NotEmpty
-    private String app_id;
-    @NotEmpty
-    private String method;
-    @NotNull
-    private Long timestamp;
+
 }

@@ -18,6 +18,6 @@ public class AaaController {
         SsoUser ssoUser = new SsoUser();
         ssoUser.setId(1);
         ssoUser.setName("张三");
-        return new SsoResponse().code(200).data(ssoUser);
+        return SsoResponse.success(ssoUser);
     }
 }

@@ -4,8 +4,8 @@ import com.zhaizq.sso.common.cache.TokenCache;
 import com.zhaizq.sso.common.cache.UserCache;
 import com.zhaizq.sso.controller.BaseController;
 import com.zhaizq.sso.common.exception.BusinessException;
-import com.zhaizq.sso.service.domain.entry.User;
-import com.zhaizq.sso.service.service.LoginService;
+import com.zhaizq.sso.mapper.entry.User;
+import com.zhaizq.sso.service.LoginService;
 import com.zhaizq.sso.sdk.SsoConstant;
 import com.zhaizq.sso.sdk.SsoHelper;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
@@ -59,7 +59,7 @@ public class LoginController extends BaseController {
     @GetMapping("/public_key")
     public SsoResponse public_key(@RequestParam String name) throws NoSuchAlgorithmException {
         String publicKey = loginService.getPublicKeyByName(name);
-        return new SsoResponse().code(200).data(publicKey);
+        return SsoResponse.success(publicKey);
     }
 
     @PostMapping("/do_login")
@@ -78,6 +78,6 @@ public class LoginController extends BaseController {
 
         userCache.put(ssoToken, user);
 
-        return new SsoResponse().code(200).data(ssoToken);
+        return SsoResponse.success(ssoToken);
     }
 }

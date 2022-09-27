@@ -1,6 +1,6 @@
 package com.zhaizq.sso.common.cache;
 
-import com.zhaizq.sso.service.domain.entry.User;
+import com.zhaizq.sso.mapper.entry.User;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

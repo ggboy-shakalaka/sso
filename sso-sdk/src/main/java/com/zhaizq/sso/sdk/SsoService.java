@@ -1,12 +1,11 @@
 package com.zhaizq.sso.sdk;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
 import com.zhaizq.sso.sdk.domain.response.SsoResponse;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +14,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.stream.Stream;
 
-@Slf4j
 @AllArgsConstructor
 public class SsoService {
     private final SsoConfig ssoConfig;
@@ -35,7 +33,7 @@ public class SsoService {
     }
 
     public SsoResponse checkToken(String token) throws IOException {
-        if (token == null) return new SsoResponse().code(400);
+        if (token == null) return SsoResponse.create(400, null, null);
 
         String s = HttpUtil.doPost(ssoConfig.getServer() + "/api/checkToken", "token=" + token);
         return JSON.parseObject(s, SsoResponse.class);

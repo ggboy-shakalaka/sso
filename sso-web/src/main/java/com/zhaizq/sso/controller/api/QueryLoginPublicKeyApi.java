@@ -3,7 +3,7 @@ package com.zhaizq.sso.controller.api;
 import com.zhaizq.sso.sdk.SsoConstant;
 import com.zhaizq.sso.sdk.domain.request.SsoQueryLoginPublicKeyRequest;
 import com.zhaizq.sso.sdk.domain.response.SsoResponse;
-import com.zhaizq.sso.service.service.LoginService;
+import com.zhaizq.sso.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,6 @@ public class QueryLoginPublicKeyApi extends BaseApi<SsoQueryLoginPublicKeyReques
     @Override
     Object doService(SsoQueryLoginPublicKeyRequest data) throws NoSuchAlgorithmException {
         String publicKey = loginService.getPublicKeyByName(data.getName());
-        return new SsoResponse().code(200).data(publicKey);
+        return SsoResponse.success(publicKey);
     }
 }

@@ -1,4 +1,4 @@
-package com.zhaizq.sso.service.service;
+package com.zhaizq.sso.service;
 
 public class StringRsaUtil {
     public static String decryptByPrivateKey(String encryptedPassword, String privateKey) {

@@ -1,8 +1,11 @@
 package com.zhaizq.sso.common.enums;
 
-
 import com.zhaizq.sso.common.exception.BusinessException;
+import lombok.AllArgsConstructor;
 
+import java.util.Arrays;
+
+@AllArgsConstructor
 public enum RequestFormat {
     XML("application/xml") {
         public <T> T parse(String data, Class<T> clazz) {
@@ -28,20 +31,10 @@ public enum RequestFormat {
     }
     ;
 
-    private String mimeType;
-    RequestFormat(String mimeType) {
-        this.mimeType = mimeType;
-    }
+    private final String mimeType;
 
-    public static RequestFormat valueOof(String mimeType) {
-        if (mimeType == null)
-            return null;
-
-        for (RequestFormat item : RequestFormat.values()) {
-            if (mimeType.startsWith(item.mimeType))
-                return item;
-        }
-        return null;
+    public static RequestFormat getByType(String mimeType) {
+        return mimeType == null ? null : Arrays.stream(RequestFormat.values()).filter(v -> mimeType.startsWith(v.mimeType)).findAny().orElse(null);
     }
 
     public abstract <T> T parse(String data, Class<T> clazz);

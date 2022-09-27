@@ -1,4 +1,4 @@
-package com.zhaizq.sso.service.domain.entry;
+package com.zhaizq.sso.mapper.entry;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;

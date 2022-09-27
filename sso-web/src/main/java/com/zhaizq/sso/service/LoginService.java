@@ -1,7 +1,7 @@
-package com.zhaizq.sso.service.service;
+package com.zhaizq.sso.service;
 
-import com.zhaizq.sso.service.domain.entry.User;
-import com.zhaizq.sso.service.mapper.UserMapper;
+import com.zhaizq.sso.mapper.entry.User;
+import com.zhaizq.sso.mapper.UserMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,6 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author wzh

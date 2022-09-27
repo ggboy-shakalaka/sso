@@ -1,7 +1,7 @@
-package com.zhaizq.sso.service.service;
+package com.zhaizq.sso.service;
 
-import com.zhaizq.sso.service.domain.entry.Application;
-import com.zhaizq.sso.service.mapper.ApplicationMapper;
+import com.zhaizq.sso.mapper.entry.Application;
+import com.zhaizq.sso.mapper.ApplicationMapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

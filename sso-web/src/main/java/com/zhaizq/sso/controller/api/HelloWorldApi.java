@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
 public class HelloWorldApi extends BaseApi<SsoBaseRequest> {
     @Override
     SsoResponse doService(SsoBaseRequest data) {
-        return new SsoResponse().code(200).data("Hello World");
+        return SsoResponse.success("Hello World");
     }
 }
