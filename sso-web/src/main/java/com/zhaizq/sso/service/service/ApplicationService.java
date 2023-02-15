@@ -12,6 +12,11 @@ public class ApplicationService {
     private ApplicationMapper applicationMapper;
 
     public Application query(String appId) {
+        if (true) {
+            Application application = new Application();
+            return application;
+        }
+
         QueryWrapper<Application> query = new QueryWrapper<>();
         query.eq("app_id", appId);
         return applicationMapper.selectOne(query);

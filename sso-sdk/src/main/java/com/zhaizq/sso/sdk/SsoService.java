@@ -15,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.stream.Stream;
 
-@Slf4j
 @AllArgsConstructor
 public class SsoService {
     private final SsoConfig ssoConfig;
@@ -35,7 +34,7 @@ public class SsoService {
     }
 
     public SsoResponse checkToken(String token) throws IOException {
-        if (token == null) return new SsoResponse().code(400);
+        if (token == null) return SsoResponse.build(400, null, null);
 
         String s = HttpUtil.doPost(ssoConfig.getServer() + "/api/checkToken", "token=" + token);
         return JSON.parseObject(s, SsoResponse.class);

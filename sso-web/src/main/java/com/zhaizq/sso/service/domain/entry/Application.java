@@ -16,4 +16,8 @@ public class Application {
     private String appDesc;
     private String publicKey;
     private Date createTime;
+
+    public boolean isActive() {
+        return true;
+    }
 }

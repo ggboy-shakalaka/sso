@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class SsoBaseRequest {
+public class SsoRequest {
     @NotEmpty
     private String _uuid;
     @NotEmpty
