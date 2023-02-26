@@ -1,12 +1,11 @@
 package com.zhaizq.sso.sdk.domain.response;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Data;
 
 @Data
-public class SsoResponse {
+public class SsoResponse<T> {
     private Integer code;
-    private Object data;
+    private T data;
     private String message;
 
     public SsoResponse code(Integer code) {
@@ -19,8 +18,8 @@ public class SsoResponse {
         return this;
     }
 
-    public SsoResponse data(Object data) {
-        this.data = JSON.toJSONString(data);
+    public SsoResponse data(T data) {
+        this.data = data;
         return this;
     }
 

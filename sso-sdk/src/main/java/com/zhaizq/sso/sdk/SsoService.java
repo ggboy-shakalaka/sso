@@ -1,12 +1,11 @@
 package com.zhaizq.sso.sdk;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
 import com.zhaizq.sso.sdk.domain.response.SsoResponse;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -66,49 +65,5 @@ public class SsoService {
                 return true;
 
         return false;
-    }
-
-    private class SsoClient {
-        public SsoResponse request(String method, String request) throws Exception {
-            return JSON.parseObject(doRequest(method, request), SsoResponse.class);
-        }
-
-        public String doRequest(String method, String request) throws Exception {
-//            request = request == null ? "" : request;
-//            long timestamp = System.currentTimeMillis();
-//            String requestId = UuidUtil.random();
-//            String sign = StringRsaUtil.sign(timestamp + requestId + request, ssoConfig.getPrivateKey());
-//
-//            String response = null;
-//            Exception exception = null;
-//
-//            HttpRequest httpRequest = HttpRequest.newBuilder()
-//                    .version(HttpClient.Version.HTTP_2)
-//                    .uri(URI.create(ssoConfig.getServer()))
-//                    .header("Content-Type", "application/json")
-//                    .header("request_id", requestId)
-//                    .header("timestamp", String.valueOf(timestamp))
-//                    .header("sign", sign)
-//                    .header("app_id", ssoConfig.getAppId())
-//                    .header("method", method)
-//                    .POST(HttpRequest.BodyPublishers.ofString(request))
-//                    .build();
-//            try {
-//                return response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString()).body();
-//            } catch (Exception e) {
-//                throw exception = e;
-//            } finally {
-//                doLog(request, response, exception, System.currentTimeMillis() - timestamp);
-//            }
-            return null;
-        }
-
-        private void doLog(String request, String response, Exception e, Long time) {
-            if (ssoConfig.getLoginUrl() == null)
-                return;
-            if (e != null)
-                e.printStackTrace();
-            System.out.println(String.format("request: %s, response: %s, time: %s", request, response, time));
-        }
     }
 }

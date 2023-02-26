@@ -8,9 +8,9 @@ import javax.validation.constraints.NotNull;
 @Data
 public class SsoRequest {
     @NotEmpty
-    private String _uuid;
-    @NotEmpty
     private String _app;
+    @NotEmpty
+    private String _uuid;
     @NotEmpty
     private String _method;
     @NotNull
