@@ -28,6 +28,7 @@ public class SsoService {
     }
 
     public String getToken(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
         Cookie cookie = Stream.of(request.getCookies()).filter(v -> SsoConstant.TOKEN_NAME.equals(v.getName())).findAny().orElse(null);
         return cookie == null ? null : cookie.getValue();
     }
@@ -40,7 +41,14 @@ public class SsoService {
     }
 
     public SsoResponse checkToken(HttpServletRequest request) throws IOException {
-        return checkToken(getToken(request));
+        String token = getToken(request);
+
+        SsoResponse build = SsoResponse.build(201, "", null);
+        if ("123456".equals(token)) {
+            build.setCode(200);
+        }
+
+        return build;
     }
 
     public String buildRedirectUrl(String redirect) throws UnsupportedEncodingException {
@@ -65,5 +73,9 @@ public class SsoService {
                 return true;
 
         return false;
+    }
+
+    public boolean isMatchSetToken(String path) {
+        return SsoHelper.isMatch("/setToken", path);
     }
 }

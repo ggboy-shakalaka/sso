@@ -4,6 +4,7 @@ import com.zhaizq.sso.sdk.SsoFilter;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -32,7 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private SsoConfig ssoConfig;
 
-    //    @Bean
+    @Bean
     public FilterRegistrationBean<SsoFilter> ssoFilter() throws IOException {
         FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
         filterRegistrationBean.setFilter(new SsoFilter(ssoConfig));
