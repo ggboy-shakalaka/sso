@@ -1,6 +1,6 @@
 package com.zhaizq.sso.controller.api;
 
-import com.zhaizq.sso.sdk.domain.request.SsoRequest;
+import com.zhaizq.sso.sdk.domain.SsoRequest;
 
 import java.lang.reflect.ParameterizedType;
 

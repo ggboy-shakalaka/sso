@@ -42,7 +42,7 @@ public class ApiMethodManager {
         return method != null && this.apiMethodMap.containsKey(method);
     }
 
-    public Object invoke(String method, String body) {
+    public Object invoke(String method, String body) throws Throwable {
         return this.apiMethodMap.get(method).invoke(body);
     }
 
@@ -55,7 +55,7 @@ public class ApiMethodManager {
         private Parameter[] parameters;
         private String[] parameterNames;
 
-        private Object[] convertArgs(String str) throws InvocationTargetException, IllegalAccessException {
+        private Object[] convertArgs(String str) {
             Object[] args = new Object[parameters.length];
             JSONObject jsonObject = JSON.parseObject(str);
             for (int i = 0; i < parameters.length; i++) {
@@ -71,12 +71,12 @@ public class ApiMethodManager {
             return args;
         }
 
-        private Object invoke(String body) {
+        private Object invoke(String body) throws Throwable {
             try {
                 Object[] args = this.convertArgs(body);
                 return method.invoke(bean, args);
             } catch (InvocationTargetException | IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw e instanceof InvocationTargetException ? ((InvocationTargetException) e).getTargetException() : e;
             }
         }
     }

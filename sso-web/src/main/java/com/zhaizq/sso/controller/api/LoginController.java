@@ -9,7 +9,7 @@ import com.zhaizq.sso.service.service.LoginService;
 import com.zhaizq.sso.sdk.SsoConstant;
 import com.zhaizq.sso.sdk.SsoHelper;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
-import com.zhaizq.sso.sdk.domain.response.SsoResponse;
+import com.zhaizq.sso.sdk.domain.SsoResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

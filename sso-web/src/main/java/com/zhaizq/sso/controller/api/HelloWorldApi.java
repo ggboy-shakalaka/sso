@@ -2,7 +2,7 @@ package com.zhaizq.sso.controller.api;
 
 import com.zhaizq.sso.sdk.SsoConstant;
 import com.zhaizq.sso.sdk.domain.request.SsoBaseRequest;
-import com.zhaizq.sso.sdk.domain.response.SsoResponse;
+import com.zhaizq.sso.sdk.domain.SsoResponse;
 import org.springframework.stereotype.Service;
 
 @Service(SsoConstant.Method.HELLO_WORLD)

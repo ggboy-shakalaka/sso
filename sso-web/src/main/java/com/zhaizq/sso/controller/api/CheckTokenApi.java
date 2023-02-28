@@ -3,7 +3,7 @@ package com.zhaizq.sso.controller.api;
 import com.zhaizq.sso.sdk.SsoConstant;
 import com.zhaizq.sso.sdk.domain.SsoUser;
 import com.zhaizq.sso.sdk.domain.request.SsoCheckTokenRequest;
-import com.zhaizq.sso.sdk.domain.response.SsoResponse;
+import com.zhaizq.sso.sdk.domain.SsoResponse;
 import com.zhaizq.sso.service.domain.entry.User;
 import com.zhaizq.sso.service.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;

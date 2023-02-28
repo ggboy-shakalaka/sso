@@ -1,11 +1,11 @@
-package com.zhaizq.sso.sdk.domain.response;
+package com.zhaizq.sso.sdk.domain;
 
 import lombok.Data;
 
 @Data
-public class SsoResponse<T> {
+public class SsoResponse {
     private Integer code;
-    private T data;
+    private Object data;
     private String message;
 
     public SsoResponse code(Integer code) {
@@ -18,7 +18,7 @@ public class SsoResponse<T> {
         return this;
     }
 
-    public SsoResponse data(T data) {
+    public SsoResponse data(Object data) {
         this.data = data;
         return this;
     }

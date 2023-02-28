@@ -12,13 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpUtil {
-    public static String doPost(String url, String data) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json; charset=utf8");
-        headers.put("Content-Type", "application/json; charset=utf8");
-        return doRequest(url, "POST", headers, data);
-    }
-
     public static String postJson(String url, String data) throws IOException {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json; charset=utf8");

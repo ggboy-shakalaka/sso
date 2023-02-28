@@ -3,24 +3,27 @@ package com.zhaizq.sso.sdk;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
+import com.zhaizq.sso.sdk.domain.SsoRequest;
+import com.zhaizq.sso.sdk.domain.SsoResponse;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
-import com.zhaizq.sso.sdk.domain.response.SsoResponse;
 import lombok.AllArgsConstructor;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 @AllArgsConstructor
 public class SsoService {
     private final SsoConfig ssoConfig;
-    private final SsoClient ssoClient = new SsoClient();;
-
     public SsoResponse helloWorld() throws Exception {
-        return ssoClient.request(SsoConstant.Method.HELLO_WORLD, null);
+        return this.request(SsoConstant.Method.HELLO_WORLD, null);
     }
 
     public SsoResponse refreshToken(String name) throws Exception {
@@ -34,25 +37,21 @@ public class SsoService {
     }
 
     public SsoResponse checkToken(String token) throws IOException {
+        this.request("", null);
+
         if (token == null) return SsoResponse.build(400, null, null);
 
-        String s = HttpUtil.doPost(ssoConfig.getServer() + "/api/checkToken", "token=" + token);
+        String s = HttpUtil.postJson(ssoConfig.getServer() + "/api/checkToken", "token=" + token);
         return JSON.parseObject(s, SsoResponse.class);
     }
 
     public SsoResponse checkToken(HttpServletRequest request) throws IOException {
         String token = getToken(request);
-
-        SsoResponse build = SsoResponse.build(201, "", null);
-        if ("123456".equals(token)) {
-            build.setCode(200);
-        }
-
-        return build;
+        return this.request("check_token", new JSONObject().fluentPut("token", token));
     }
 
     public String buildRedirectUrl(String redirect) throws UnsupportedEncodingException {
-        return ssoConfig.getServer() + "/uncheck/refresh?appKey=" + ssoConfig.getAppId() + "&redirect=" + URLEncoder.encode(redirect, "UTF-8");
+        return ssoConfig.getServer() + "/uncheck/refresh?appKey=" + ssoConfig.getApp() + "&redirect=" + URLEncoder.encode(redirect, "UTF-8");
     }
 
     public SsoResponse queryLoginPublicKey(String name) throws Exception {
@@ -60,16 +59,16 @@ public class SsoService {
     }
 
     public SsoResponse login(SsoLoginRequest request) throws Exception {
-        return ssoClient.request(SsoConstant.Method.LOGIN, JSON.toJSONString(request));
+        return this.request(SsoConstant.Method.LOGIN, JSON.toJSONString(request));
     }
 
     public SsoResponse logout(String token) throws Exception {
-        return ssoClient.request(SsoConstant.Method.CHECK_TOKEN, new JSONObject().fluentPut("token", token).toJSONString());
+        return this.request(SsoConstant.Method.CHECK_TOKEN, new JSONObject().fluentPut("token", token).toJSONString());
     }
 
-    public boolean isMatchIgnore(String path) {
-        for (String ignoreUrl : ssoConfig.getIgnore())
-            if (SsoHelper.isMatch(ignoreUrl, path))
+    public boolean isNotMatch(String path) {
+        for (String ignore : ssoConfig.getIgnore())
+            if (SsoHelper.isMatch(ignore, path))
                 return true;
 
         return false;
@@ -77,5 +76,40 @@ public class SsoService {
 
     public boolean isMatchSetToken(String path) {
         return SsoHelper.isMatch("/setToken", path);
+    }
+
+    private SsoResponse request(String method, Object params) {
+        try {
+            SsoRequest ssoRequest = new SsoRequest();
+            ssoRequest.setApp(ssoConfig.getApp());
+            ssoRequest.setUuid(UUID.randomUUID().toString());
+            ssoRequest.setMethod(method);
+            ssoRequest.setTimestamp(System.currentTimeMillis());
+            ssoRequest.setParams(params);
+
+            String body = JSON.toJSONString(ssoRequest);
+            String sign = StringRsaUtil.sign(body, ssoConfig.getPrivateKey());
+            String url = ssoConfig.getServer() + "?sign=" + sign;
+
+            long time = System.currentTimeMillis();
+            System.out.printf("[APP -> SSO] url: %s, body: %s%n", url, body);
+            String result = this.doRequest(url, body);
+            System.out.printf("[APP <- SSO] result: %s, time: %d(ms)%n", result, System.currentTimeMillis() - time);
+            return JSON.parseObject(result, SsoResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected String doRequest(String url, String body) throws IOException {
+        return HttpUtil.postJson(url, body);
+    }
+
+    protected void doOnTokenExpire(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", 302);
+        map.put("path", "http://localhost:8080/uncheck/refresh-token");
+        map.put("redirect", "http://localhost:8081/setToken");
+        response.getWriter().write(JSON.toJSONString(map));
     }
 }

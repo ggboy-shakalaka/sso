@@ -4,8 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.zhaizq.sso.common.exception.BusinessException;
 import com.zhaizq.sso.common.utils.ValidateUtil;
 import com.zhaizq.sso.controller.api.StringRsaUtil;
-import com.zhaizq.sso.sdk.domain.request.SsoRequest;
-import com.zhaizq.sso.sdk.domain.response.SsoResponse;
+import com.zhaizq.sso.sdk.domain.SsoRequest;
+import com.zhaizq.sso.sdk.domain.SsoResponse;
 import com.zhaizq.sso.service.domain.entry.Application;
 import com.zhaizq.sso.service.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,12 +38,13 @@ public class ApiController extends BaseController {
             this.invalidMethod(ssoRequest);
 //            this.invalidSign(ssoRequest, body, sign);
 
-            Object data = apiMethodManager.invoke(ssoRequest.get_method(), body);
+            // TODO parse params
+            Object data = apiMethodManager.invoke(ssoRequest.getMethod(), ssoRequest.getParams() == null ? null : ssoRequest.getParams().toString());
 
             return SsoResponse.build(200, data, null);
         } catch (BusinessException e) {
             return SsoResponse.build(400, null, e.getMessage());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("系统内部错误", e);
             return SsoResponse.build(500, null, "系统内部错误");
         }
@@ -60,7 +61,7 @@ public class ApiController extends BaseController {
      * 过期请求
      */
     private void timeoutRequest(SsoRequest request) {
-        if (System.currentTimeMillis() - request.get_timestamp() > TIMESTAMP_TIME_OUT) {
+        if (System.currentTimeMillis() - request.getTimestamp() > TIMESTAMP_TIME_OUT) {
             throw new BusinessException("请求已过期");
         }
     }
@@ -81,8 +82,8 @@ public class ApiController extends BaseController {
      * 无效接口
      */
     private void invalidMethod(SsoRequest request) {
-        if (!apiMethodManager.exists(request.get_method()))
-            throw new BusinessException("服务[" + request.get_method() + "]不存在");
+        if (!apiMethodManager.exists(request.getMethod()))
+            throw new BusinessException("服务[" + request.getMethod() + "]不存在");
 
         // TODO 鉴权 (暂时不需要)
     }
@@ -91,9 +92,9 @@ public class ApiController extends BaseController {
      * 无效签名
      */
     private void invalidSign(SsoRequest request, String str, String sign) {
-        Application application = applicationService.query(request.get_app());
+        Application application = applicationService.query(request.getApp());
         if (application == null || !application.isActive()) {
-            throw new BusinessException("应用[" + request.get_app() + "]未注册");
+            throw new BusinessException("应用[" + request.getApp() + "]未注册");
         }
 
         // 验签

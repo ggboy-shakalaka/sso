@@ -33,13 +33,14 @@ public class SsoHelper {
         return cookie == null ? null : cookie.getValue();
     }
 
-    public static void setSsoToken(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie(SsoConstant.TOKEN_NAME, token);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-    }
-
     public static String getRootPath(HttpServletRequest request) {
         return request.getRequestURL().substring(0, request.getRequestURL().length() - request.getRequestURI().length());
+    }
+
+    public static void setSsoToken(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie(SsoConstant.TOKEN_NAME, token);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
     }
 }

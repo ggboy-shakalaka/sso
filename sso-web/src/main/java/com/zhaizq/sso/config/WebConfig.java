@@ -30,13 +30,10 @@ public class WebConfig implements WebMvcConfigurer {
 //        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
     }
 
-    @Autowired
-    private SsoConfig ssoConfig;
-
     @Bean
     public FilterRegistrationBean<SsoFilter> ssoFilter() throws IOException {
         FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new SsoFilter(ssoConfig));
+        filterRegistrationBean.setFilter(new SsoFilter(new SsoConfig()));
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setEnabled(true);
         return filterRegistrationBean;

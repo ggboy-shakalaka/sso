@@ -12,15 +12,8 @@ import java.net.URI;
 @Slf4j
 @RestController
 public class IndexController extends BaseController {
-    @PostMapping
+    @GetMapping
     public String index() {
         return "hello world!";
-    }
-
-    @GetMapping("/uncheck/refreshToken")
-    public void refreshToken() throws IOException {
-        String redirect = request.getParameter("redirect");
-        String path = new URIBuilder(URI.create(redirect)).addParameter("sso.token", "123456").toString();
-        response.sendRedirect(path);
     }
 }
