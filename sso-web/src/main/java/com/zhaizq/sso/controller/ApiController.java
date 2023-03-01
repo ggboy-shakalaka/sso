@@ -3,7 +3,7 @@ package com.zhaizq.sso.controller;
 import com.alibaba.fastjson2.JSON;
 import com.zhaizq.sso.common.exception.BusinessException;
 import com.zhaizq.sso.common.utils.ValidateUtil;
-import com.zhaizq.sso.controller.api.StringRsaUtil;
+import com.zhaizq.sso.sdk.StringRsaUtil;
 import com.zhaizq.sso.sdk.domain.SsoRequest;
 import com.zhaizq.sso.sdk.domain.SsoResponse;
 import com.zhaizq.sso.service.domain.entry.Application;

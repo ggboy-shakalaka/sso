@@ -1,6 +1,5 @@
 package com.zhaizq.sso.sdk;
 
-import com.zhaizq.sso.sdk.domain.SsoConfig;
 import com.zhaizq.sso.sdk.domain.SsoResponse;
 import lombok.AllArgsConstructor;
 
@@ -12,10 +11,6 @@ import java.io.IOException;
 @AllArgsConstructor
 public class SsoFilter implements Filter {
     private final SsoService ssoService;
-
-    public SsoFilter(SsoConfig ssoConfig) {
-        this.ssoService = new SsoService(ssoConfig);
-    }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {

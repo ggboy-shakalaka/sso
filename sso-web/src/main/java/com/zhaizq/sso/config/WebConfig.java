@@ -1,8 +1,8 @@
 package com.zhaizq.sso.config;
 
 import com.zhaizq.sso.sdk.SsoFilter;
+import com.zhaizq.sso.sdk.SsoService;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +10,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.io.IOException;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -31,9 +29,13 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean<SsoFilter> ssoFilter() throws IOException {
+    public FilterRegistrationBean<SsoFilter> ssoFilter() {
+        SsoConfig ssoConfig = new SsoConfig();
+        SsoService ssoService = new SsoService(ssoConfig);
+        SsoFilter ssoFilter = new SsoFilter(ssoService);
+
         FilterRegistrationBean<SsoFilter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new SsoFilter(new SsoConfig()));
+        filterRegistrationBean.setFilter(ssoFilter);
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setEnabled(true);
         return filterRegistrationBean;

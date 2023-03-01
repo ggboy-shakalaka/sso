@@ -5,8 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.zhaizq.sso.sdk.domain.SsoConfig;
 import com.zhaizq.sso.sdk.domain.SsoRequest;
 import com.zhaizq.sso.sdk.domain.SsoResponse;
+import com.zhaizq.sso.sdk.domain.SsoServerConfig;
 import com.zhaizq.sso.sdk.domain.request.SsoLoginRequest;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -19,9 +20,22 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@AllArgsConstructor
+@Getter
 public class SsoService {
     private final SsoConfig ssoConfig;
+    private final SsoServerConfig serverConfig;
+
+    public SsoService(SsoConfig ssoConfig) {
+        this.ssoConfig = ssoConfig;
+        this.serverConfig = new SsoServerConfig();
+    }
+
+    public SsoServerConfig queryConfig() throws Exception {
+        SsoResponse response = this.request("query_config");
+        return response.getData() != null ? JSON.parseObject(response.getData().toString(), SsoServerConfig.class) : null;
+    }
+
+
     public SsoResponse helloWorld() throws Exception {
         return this.request(SsoConstant.Method.HELLO_WORLD, null);
     }
@@ -75,7 +89,20 @@ public class SsoService {
     }
 
     public boolean isMatchSetToken(String path) {
-        return SsoHelper.isMatch("/setToken", path);
+        return SsoHelper.isMatch(ssoConfig.getSetToken(), path);
+    }
+
+    private SsoServerConfig getServerConfig() {
+        if (!serverConfig.isInit()) {
+
+        }
+
+        serverConfig.setInit(true);
+        return serverConfig;
+    }
+
+    private SsoResponse request(String method) {
+        return request(method, null);
     }
 
     private SsoResponse request(String method, Object params) {
@@ -106,10 +133,13 @@ public class SsoService {
     }
 
     protected void doOnTokenExpire(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String redirect = ssoConfig.getHost() + ssoConfig.getSetToken();
+
         Map<String, Object> map = new HashMap<>();
         map.put("code", 302);
-        map.put("path", "http://localhost:8080/uncheck/refresh-token");
-        map.put("redirect", "http://localhost:8081/setToken");
+        map.put("path", serverConfig.getRefreshTokenUrl());
+        map.put("redirect", redirect);
+        map.put("sign", StringRsaUtil.sign(redirect, ssoConfig.getPrivateKey()));
         response.getWriter().write(JSON.toJSONString(map));
     }
 }
